@@ -1,132 +1,153 @@
 #include <SFML/Graphics.hpp>
-#include <cmath>
 #include <vector>
+#include <cmath>
+#include <memory>
 
-using namespace std;
-
-// Classe de base pour les corps célestes
 class CelestialBody {
 protected:
+    sf::Vector2f position;
+    float mass;
+    sf::Color color;
     sf::CircleShape shape;
-    float angle;
+    std::string name;
 
 public:
-    CelestialBody(float radius, const std::string& textureFile) : angle(0.0f) {
+    CelestialBody(float x, float y, float radius, sf::Color bodyColor, const std::string& bodyName) 
+        : position(x, y), mass(radius * 10), color(bodyColor), name(bodyName) {
         shape.setRadius(radius);
-        if (!textureFile.empty()) {
-            sf::Texture texture;
-            texture.loadFromFile(textureFile);
-            shape.setTexture(&texture);
-        }
+        shape.setFillColor(color);
+        shape.setOrigin(radius, radius);
+        shape.setPosition(position);
     }
 
-    virtual void updatePosition(float centerX, float centerY) = 0;
-
-    sf::CircleShape getShape() const {
-        return shape;
+    virtual void update(float deltaTime) = 0;
+    virtual void draw(sf::RenderWindow& window) {
+        window.draw(shape);
     }
 
-    void setPosition(float x, float y) {
-        shape.setPosition(x - shape.getRadius(), y - shape.getRadius());
-    }
-
-    sf::Vector2f getPosition() const {
-        return shape.getPosition() + sf::Vector2f(shape.getRadius(), shape.getRadius());
-    }
+    sf::Vector2f getPosition() const { return position; }
+    std::string getName() const { return name; }
 };
 
-// Classe pour représenter une étoile
 class Star : public CelestialBody {
 public:
-    Star(float radius, const std::string& textureFile) : CelestialBody(radius, textureFile) {}
+    Star(float x, float y, float radius) 
+        : CelestialBody(x, y, radius, sf::Color::Yellow, "Soleil") {}
 
-    void updatePosition(float centerX, float centerY) override {
-        setPosition(centerX, centerY);
-    }
+    void update(float deltaTime) override {}
 };
 
-// Classe pour représenter une planète
 class Planet : public CelestialBody {
 private:
-    float distanceFromSun;
-    float speed;
-    float radius;
+    Star* parentStar;
+    float orbitRadius;
+    float orbitAngle;
+    float orbitSpeed;
 
 public:
-    Planet(float radius, sf::Color color, float distanceFromSun, const std::string& textureFile = "")
-        : CelestialBody(radius, textureFile), distanceFromSun(distanceFromSun) {
-        shape.setFillColor(color);
-    }
+    Planet(Star* star, float distance, float radius, sf::Color color, const std::string& name, float speed) 
+        : CelestialBody(star->getPosition().x + distance, star->getPosition().y, radius, color, name),
+          parentStar(star), orbitRadius(distance), orbitAngle(0), 
+          orbitSpeed(speed) {}
 
-    float getDistanceFromSun() const { return distanceFromSun; }
-
-    float getRadius() const {
-        return radius;
-    }
-
-    void updatePosition(float centerX, float centerY) override {
-        angle += speed;
-        setPosition(centerX + distanceFromSun * cos(angle), centerY + distanceFromSun * sin(angle));
+    void update(float deltaTime) override {
+        orbitAngle += orbitSpeed * deltaTime;
+        position.x = parentStar->getPosition().x + std::cos(orbitAngle) * orbitRadius;
+        position.y = parentStar->getPosition().y + std::sin(orbitAngle) * orbitRadius;
+        shape.setPosition(position);
     }
 };
 
-// Classe pour représenter un satellite
 class Satellite : public CelestialBody {
 private:
-    float distance;
     Planet* parentPlanet;
-    float speed;
+    float orbitRadius;
+    float orbitAngle;
+    float orbitSpeed;
 
 public:
-    Satellite(float radius, sf::Color color, float speed, Planet* parent)
-        : CelestialBody(radius * 0.05f, ""), parentPlanet(parent) {
-        distance = parentPlanet->getRadius() * 2.0f;
-        this->speed = speed;
-        shape.setFillColor(color);
+    Satellite(Planet* planet, float distance, float radius, sf::Color color, const std::string& name, float speed) 
+        : CelestialBody(planet->getPosition().x + distance, planet->getPosition().y, radius, color, name),
+          parentPlanet(planet), orbitRadius(distance), orbitAngle(0), 
+          orbitSpeed(speed) {}
+
+    void update(float deltaTime) override {
+        orbitAngle += orbitSpeed * deltaTime;
+        position.x = parentPlanet->getPosition().x + std::cos(orbitAngle) * orbitRadius;
+        position.y = parentPlanet->getPosition().y + std::sin(orbitAngle) * orbitRadius;
+        shape.setPosition(position);
+    }
+};
+
+class SolarSystem {
+private:
+    Star centralStar;
+    std::vector<std::unique_ptr<Planet>> planets;
+    std::vector<std::unique_ptr<Satellite>> satellites;
+
+public:
+    SolarSystem(sf::RenderWindow& window) : 
+        centralStar(window.getSize().x / 2.0f, window.getSize().y / 2.0f, 50) {
+        float centerX = window.getSize().x / 2.0f;
+        float centerY = window.getSize().y / 2.0f;
+
+        // Mercure
+        planets.push_back(std::make_unique<Planet>(&centralStar, 90, 5, sf::Color(128, 128, 128), "Mercure", 1.2f));
+        
+        // Vénus
+        planets.push_back(std::make_unique<Planet>(&centralStar, 130, 7, sf::Color(255, 200, 100), "Vénus", 0.9f));
+        
+        // Terre et Lune
+        auto* terre = new Planet(&centralStar, 180, 8, sf::Color(100, 150, 255), "Terre", 0.7f);
+        planets.push_back(std::unique_ptr<Planet>(terre));
+        satellites.push_back(std::make_unique<Satellite>(terre, 25, 3, sf::Color(200, 200, 200), "Lune", 2.0f));
+        
+        // Mars et ses lunes
+        auto* mars = new Planet(&centralStar, 230, 6, sf::Color(255, 100, 0), "Mars", 0.6f);
+        planets.push_back(std::unique_ptr<Planet>(mars));
+        satellites.push_back(std::make_unique<Satellite>(mars, 20, 2, sf::Color(150, 150, 150), "Phobos", 3.0f));
+        satellites.push_back(std::make_unique<Satellite>(mars, 30, 2, sf::Color(200, 200, 200), "Deimos", 2.5f));
+        
+        // Jupiter et ses principales lunes
+        auto* jupiter = new Planet(&centralStar, 320, 20, sf::Color(200, 150, 100), "Jupiter", 0.4f);
+        planets.push_back(std::unique_ptr<Planet>(jupiter));
+        satellites.push_back(std::make_unique<Satellite>(jupiter, 40, 4, sf::Color(200, 180, 150), "Io", 2.0f));
+        satellites.push_back(std::make_unique<Satellite>(jupiter, 60, 4, sf::Color(180, 160, 130), "Europe", 1.8f));
+        satellites.push_back(std::make_unique<Satellite>(jupiter, 80, 5, sf::Color(160, 140, 110), "Ganymède", 1.5f));
+        satellites.push_back(std::make_unique<Satellite>(jupiter, 100, 4, sf::Color(140, 120, 90), "Callisto", 1.3f));
+        
+        // Saturne et ses principales lunes
+        auto* saturne = new Planet(&centralStar, 420, 17, sf::Color(210, 180, 140), "Saturne", 0.3f);
+        planets.push_back(std::unique_ptr<Planet>(saturne));
+        satellites.push_back(std::make_unique<Satellite>(saturne, 50, 3, sf::Color(200, 190, 170), "Titan", 1.7f));
+        
+        // Uranus
+        planets.push_back(std::make_unique<Planet>(&centralStar, 540, 14, sf::Color(200, 230, 255), "Uranus", 0.2f));
+        
+        // Neptune
+        planets.push_back(std::make_unique<Planet>(&centralStar, 650, 12, sf::Color(100, 100, 255), "Neptune", 0.1f));
     }
 
-    void updatePosition(float centerX, float centerY) override {
-        angle += speed;
-        sf::Vector2f planetPosition = parentPlanet->getPosition();
-        setPosition(planetPosition.x + distance * cos(angle), planetPosition.y + distance * sin(angle));
+    void update(float deltaTime) {
+        centralStar.update(deltaTime);
+        for (auto& planet : planets) planet->update(deltaTime);
+        for (auto& satellite : satellites) satellite->update(deltaTime);
+    }
+
+    void draw(sf::RenderWindow& window) {
+        centralStar.draw(window);
+        for (auto& planet : planets) planet->draw(window);
+        for (auto& satellite : satellites) satellite->draw(window);
     }
 };
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Spheres", sf::Style::Default);
+    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Simulation du Système Solaire", sf::Style::Fullscreen | sf::Style::Close);
     window.setFramerateLimit(60);
 
-    // Création du soleil
-    Star soleil(30, "ressources/soleil.png");
-    soleil.setPosition(window.getSize().x / 2, window.getSize().y / 2);
+    SolarSystem solarSystem(window);
 
-    // Création des planètes
-    vector<Planet> planets = {
-        Planet(3, sf::Color(128, 128, 128), 57.91),   // Mercure
-        Planet(6, sf::Color::Yellow, 108.21), // Vénus
-        Planet(6, sf::Color::Blue, 149.60),   // Terre
-        Planet(4, sf::Color::Red, 227.92),    // Mars
-        Planet(10, sf::Color(255, 165, 0), 778.57), // Jupiter
-        Planet(9, sf::Color(218, 165, 32), 1433.5), // Saturne
-        Planet(8, sf::Color::Cyan, 2872.5),    // Uranus
-        Planet(7, sf::Color(0, 0, 139), 4495.1) // Neptune
-    };
-
-    // Création des satellites
-    vector<Satellite> satellites = {
-        Satellite(5, sf::Color::White, 0.02f, &planets[2]), // Lune de la Terre
-        Satellite(3, sf::Color(255, 228, 196), 0.03f, &planets[3]), // Phobos de Mars
-        Satellite(3, sf::Color(255, 228, 196), 0.01f, &planets[3]), // Deimos de Mars
-        Satellite(6, sf::Color(255, 215, 0), 0.04f, &planets[4]), // Io de Jupiter
-        Satellite(6, sf::Color(255, 215, 0), 0.05f, &planets[4]), // Europe de Jupiter
-        Satellite(6, sf::Color(255, 215, 0), 0.06f, &planets[4]), // Ganymède de Jupiter
-        Satellite(6, sf::Color(255, 215, 0), 0.07f, &planets[4]), // Callisto de Jupiter
-        Satellite(6, sf::Color(255, 215, 0), 0.08f, &planets[5]), // Titan de Saturne
-        Satellite(5, sf::Color(135, 206, 250), 0.09f, &planets[6]), // Titania d'Uranus
-        Satellite(5, sf::Color(135, 206, 250), 0.1f, &planets[6]), // Oberon d'Uranus
-        Satellite(5, sf::Color(0, 0, 139), 0.11f, &planets[7]) // Triton de Neptune
-    };
-
+    sf::Clock clock;
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -134,20 +155,12 @@ int main() {
                 window.close();
         }
 
-        window.clear();
-        window.draw(soleil.getShape()); // Dessiner le soleil
+        float deltaTime = clock.restart().asSeconds();
 
-        // Mettre à jour et dessiner les planètes et leurs satellites
-        for (auto& planet : planets) {
-            planet.updatePosition(window.getSize().x / 2, window.getSize().y / 2);
-            window.draw(planet.getShape());
+        solarSystem.update(deltaTime);
 
-            for (auto& satellite : satellites) {
-                satellite.updatePosition(planet.getShape().getPosition().x, planet.getShape().getPosition().y);
-                window.draw(satellite.getShape());
-            }
-        }
-
+        window.clear(sf::Color::Black);
+        solarSystem.draw(window);
         window.display();
     }
 
