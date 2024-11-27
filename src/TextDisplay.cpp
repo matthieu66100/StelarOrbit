@@ -3,10 +3,8 @@
 #include <sstream>
 
 TextDisplay::TextDisplay() : elapsedDays(0) {
-    if (!font.loadFromFile("resources/arial.ttf")) {
-        if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) {
-            throw std::runtime_error("Impossible de charger la police");
-        }
+    if (!font.loadFromFile("ressources/ARIAL.TTF")) {
+        throw std::runtime_error("Cannot load font: ressources/ARIAL.TTF");
     }
     
     dateText.setFont(font);
