@@ -1,13 +1,14 @@
-#include <SFML/Graphics.hpp>
+#ifndef SOLARSYSTEM_STAR_H
+#define SOLARSYSTEM_STAR_H
+
 #include "CelestialBody.h"
 
-class Star : public CelestialBosdy {
-  
+class Star : public CelestialBody {
 public:
-  Star(float x, float y, float radius)
-  : CelestialBosdy(x, y, radius, sf::Color::Yellow, "Soleil")
-
-    void update(float deltaTime) override {}
+    Star(float x, float y, float radius);
+    void update(float deltaTime) override;
 };
+
+#endif // SOLARSYSTEM_STAR_H
 
 
