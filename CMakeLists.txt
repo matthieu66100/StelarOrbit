@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Définir le nom du projet une seule fois
+# Define project name
 project(StelarOrbit LANGUAGES CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
-# Configuration de SFML
+# SFML Configuration
 include(FetchContent)
 FetchContent_Declare(SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
@@ -14,7 +14,7 @@ FetchContent_Declare(SFML
     GIT_SHALLOW ON)
 FetchContent_MakeAvailable(SFML)
 
-# Ajout de l'exécutable
+# Add executable
 add_executable(StelarOrbit src/main.cpp
     src/CelestialBody.cpp
     src/Star.cpp
@@ -24,21 +24,21 @@ add_executable(StelarOrbit src/main.cpp
     src/TextDisplay.cpp
 )
 
-# Lier SFML et configurer les include directories
+# Link SFML and configure include directories
 target_link_libraries(StelarOrbit PRIVATE 
     sfml-graphics
     sfml-window
     sfml-system
 )
 
-# Spécifier le standard C++ et inclure le dossier d'en-tête
+# Specify C++ standard and include directory
 target_compile_features(StelarOrbit PRIVATE cxx_std_17)
 target_include_directories(StelarOrbit PRIVATE include)
 
-# Copier le dossier Ressources
-file(COPY ${CMAKE_SOURCE_DIR}/Ressources DESTINATION ${CMAKE_BINARY_DIR}/bin)
+# Copy resources folder
+file(COPY ${CMAKE_SOURCE_DIR}/ressources DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
-# S'assurer que les DLLs de SFML sont copiées près de l'exécutable
+# Ensure SFML DLLs are copied near executable
 if (WIN32 AND BUILD_SHARED_LIBS)
     add_custom_command(TARGET StelarOrbit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different

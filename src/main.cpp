@@ -2,11 +2,15 @@
 #include "SolarSystem.h"
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "StelarOrbit - Simulation du Système Solaire", sf::Style::Fullscreen | sf::Style::Close);
+    // Create fullscreen window
+    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "StelarOrbit - Solar System Simulation", 
+                           sf::Style::Fullscreen | sf::Style::Close);
     window.setFramerateLimit(60);
 
+    // Initialize solar system
     SolarSystem solarSystem(window);
 
+    // Main game loop
     sf::Clock clock;
     while (window.isOpen()) {
         sf::Event event;
@@ -32,6 +36,7 @@ int main() {
             }
         }
 
+        // Update and render
         float deltaTime = clock.restart().asSeconds();
         solarSystem.update(deltaTime);
 
