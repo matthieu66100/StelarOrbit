@@ -3,11 +3,10 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <string>
-#include <ctime>
 #include "Star.h"
 #include "Planet.h"
 #include "Satellite.h"
+#include "TextDisplay.h"
 
 class SolarSystem {
 private:
@@ -17,12 +16,7 @@ private:
     std::vector<Satellite*> satellites;
     bool isPaused;
     float simulationSpeed;
-    
-    // Ajouts pour l'affichage de la date
-    sf::Font font;
-    sf::Text dateText;
-    float elapsedDays;
-    std::string getCurrentDate() const;
+    TextDisplay textDisplay;
 
 public:
     SolarSystem(sf::RenderWindow& window);
