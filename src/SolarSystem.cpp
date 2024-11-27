@@ -1,6 +1,6 @@
 #include "SolarSystem.h"
 
-SolarSystem::SolarSystem(sf::RenderWindow& win) : window(win), isPaused(false) {
+SolarSystem::SolarSystem(sf::RenderWindow& win) : window(win), isPaused(false), simulationSpeed(1.0f) {
     // Soleil
     star = new Star(window.getSize().x / 2.f, window.getSize().y / 2.f, 50.f);
     
@@ -56,9 +56,10 @@ SolarSystem::~SolarSystem() {
 void SolarSystem::update(float deltaTime) {
     if (isPaused) return;
     
-    star->update(deltaTime);
-    for (auto planet : planets) planet->update(deltaTime);
-    for (auto satellite : satellites) satellite->update(deltaTime);
+    float adjustedDeltaTime = deltaTime * simulationSpeed;
+    star->update(adjustedDeltaTime);
+    for (auto planet : planets) planet->update(adjustedDeltaTime);
+    for (auto satellite : satellites) satellite->update(adjustedDeltaTime);
 }
 
 void SolarSystem::draw(sf::RenderWindow& window) {
@@ -69,4 +70,12 @@ void SolarSystem::draw(sf::RenderWindow& window) {
 
 void SolarSystem::togglePause() {
     isPaused = !isPaused;
+}
+
+void SolarSystem::increaseSpeed() {
+    simulationSpeed = std::min(simulationSpeed * 1.5f, 10.0f);
+}
+
+void SolarSystem::decreaseSpeed() {
+    simulationSpeed = std::max(simulationSpeed * 0.75f, 0.1f);
 }

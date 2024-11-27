@@ -21,7 +21,7 @@ StelarOrbit est une simulation éducative qui représente le système solaire av
 1. Clonez le dépôt :
 
 ```bash
-git clone https://github.com/votre-username/StelarOrbit.git
+git clone https://github.com/matthieu66100/StelarOrbit.git
 cd StelarOrbit
 ```
 
@@ -52,6 +52,8 @@ Depuis le dossier `build`, lancez l'exécutable :
 
 - **Espace** : Mettre en pause / Reprendre la simulation
 - **Échap** : Quitter la simulation
+- **Page Up** : Augmenter la vitesse de simulation (jusqu'à 10x)
+- **Page Down** : Diminuer la vitesse de simulation (jusqu'à 0.1x)
 
 ## Structure du projet
 

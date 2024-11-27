@@ -2,7 +2,7 @@
 #include "SolarSystem.h"
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "Simulation du Système Solaire", sf::Style::Fullscreen | sf::Style::Close);
+    sf::RenderWindow window(sf::VideoMode::getDesktopMode(), "StelarOrbit - Simulation du Système Solaire", sf::Style::Fullscreen | sf::Style::Close);
     window.setFramerateLimit(60);
 
     SolarSystem solarSystem(window);
@@ -15,11 +15,19 @@ int main() {
                 window.close();
             }
             if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Space) {
-                    solarSystem.togglePause();
-                }
-                if (event.key.code == sf::Keyboard::Escape) {
-                    window.close();
+                switch (event.key.code) {
+                    case sf::Keyboard::Space:
+                        solarSystem.togglePause();
+                        break;
+                    case sf::Keyboard::Escape:
+                        window.close();
+                        break;
+                    case sf::Keyboard::PageUp:
+                        solarSystem.increaseSpeed();
+                        break;
+                    case sf::Keyboard::PageDown:
+                        solarSystem.decreaseSpeed();
+                        break;
                 }
             }
         }

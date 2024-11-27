@@ -14,6 +14,7 @@ private:
     std::vector<Planet*> planets;
     std::vector<Satellite*> satellites;
     bool isPaused;
+    float simulationSpeed;
 
 public:
     SolarSystem(sf::RenderWindow& window);
@@ -22,6 +23,8 @@ public:
     void draw(sf::RenderWindow& window);
     void togglePause();
     bool getPauseState() const { return isPaused; }
+    void increaseSpeed();
+    void decreaseSpeed();
 };
 
 #endif // SOLARSYSTEM_SOLARSYSTEM_H
