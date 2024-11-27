@@ -14,6 +14,7 @@ private:
 public:
     Planet(Star* star, float distance, float radius, sf::Color color, const std::string& name, float speed);
     void update(float deltaTime) override;
+    float getOrbitAngle() const { return orbitAngle; }
 };
 
 #endif // SOLARSYSTEM_PLANET_H

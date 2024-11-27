@@ -1,6 +1,29 @@
 #include "SolarSystem.h"
+#include <iomanip>
+#include <sstream>
+#include <cmath>
 
-SolarSystem::SolarSystem(sf::RenderWindow& win) : window(win), isPaused(false), simulationSpeed(1.0f) {
+// Pour définir M_PI si ce n'est pas déjà fait
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+SolarSystem::SolarSystem(sf::RenderWindow& win) : window(win), isPaused(false), simulationSpeed(1.0f), elapsedDays(0) {
+    // Chargement de la police
+    if (!font.loadFromFile("resources/arial.ttf")) {
+        // Si la police personnalisée n'est pas trouvée, on utilise la police système
+        if (!font.loadFromFile("C:/Windows/Fonts/arial.ttf")) {
+            // Si même la police système n'est pas trouvée, on lance une exception
+            throw std::runtime_error("Impossible de charger la police");
+        }
+    }
+    
+    // Configuration du texte
+    dateText.setFont(font);
+    dateText.setCharacterSize(20);
+    dateText.setFillColor(sf::Color::White);
+    dateText.setPosition(10, 10);
+    
     // Soleil
     star = new Star(window.getSize().x / 2.f, window.getSize().y / 2.f, 50.f);
     
@@ -53,10 +76,28 @@ SolarSystem::~SolarSystem() {
     for (auto satellite : satellites) delete satellite;
 }
 
+std::string SolarSystem::getCurrentDate() const {
+    // On part du 1er janvier 2024
+    time_t baseTime = 1704067200; // timestamp pour 01/01/2024
+    time_t currentTime = baseTime + static_cast<time_t>(elapsedDays * 86400); // 86400 secondes par jour
+    
+    struct tm* timeinfo = localtime(&currentTime);
+    std::stringstream ss;
+    ss << std::put_time(timeinfo, "%d/%m/%Y");
+    return ss.str();
+}
+
 void SolarSystem::update(float deltaTime) {
     if (isPaused) return;
     
     float adjustedDeltaTime = deltaTime * simulationSpeed;
+    
+    // Mise à jour des jours écoulés (1 tour complet = 365.25 jours)
+    // On utilise la position angulaire de la Terre pour calculer la date
+    Planet* earth = planets[2]; // La Terre est la 3ème planète
+    float earthOrbitAngle = earth->getOrbitAngle();
+    elapsedDays = (earthOrbitAngle / (2 * M_PI)) * 365.25;
+    
     star->update(adjustedDeltaTime);
     for (auto planet : planets) planet->update(adjustedDeltaTime);
     for (auto satellite : satellites) satellite->update(adjustedDeltaTime);
@@ -66,6 +107,10 @@ void SolarSystem::draw(sf::RenderWindow& window) {
     star->draw(window);
     for (auto planet : planets) planet->draw(window);
     for (auto satellite : satellites) satellite->draw(window);
+    
+    // Mise à jour et affichage de la date
+    dateText.setString(getCurrentDate());
+    window.draw(dateText);
 }
 
 void SolarSystem::togglePause() {
