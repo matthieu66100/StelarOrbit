@@ -10,6 +10,7 @@ private:
     float orbitRadius;
     float orbitAngle;
     float orbitSpeed;
+    static float getRotationSpeed(const std::string& name);
 
 public:
     Planet(Star* star, float distance, float radius, sf::Color color, const std::string& name, float speed);
