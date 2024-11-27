@@ -45,11 +45,11 @@ std::string TextDisplay::getChronoText() const {
         return ss.str();
     }
 
-    // Affichage dans l'ordre : heures/jours/mois/années
-    if (hours > 0) ss << hours << "h ";
-    if (days > 0) ss << days << "d ";
-    if (months > 0) ss << months << "m ";
-    if (years > 0) ss << years << "y";
+    // Toujours remplir avec des zéros et afficher même si égal à 1
+    if (hours >= 0) ss << std::setfill('0') << std::setw(2) << hours << "h ";
+    if (days >= 0) ss << std::setfill('0') << std::setw(2) << days << "d ";
+    if (months >= 0) ss << std::setfill('0') << std::setw(2) << months << "m ";
+    if (years > 0) ss << std::setfill('0') << std::setw(4) << years << "y";
 
     return ss.str();
 }
