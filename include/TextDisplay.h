@@ -9,8 +9,10 @@ class TextDisplay {
 private:
     sf::Font font;
     sf::Text dateText;
+    sf::Text chronoText;
     float elapsedDays;
     std::string getCurrentDate() const;
+    std::string getChronoText() const;
 
 public:
     TextDisplay();
