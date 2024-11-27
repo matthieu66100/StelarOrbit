@@ -7,11 +7,13 @@ TextDisplay::TextDisplay() : elapsedDays(0) {
         throw std::runtime_error("Cannot load font: ressources/ARIAL.TTF");
     }
     
+    // Configure date text
     dateText.setFont(font);
     dateText.setCharacterSize(20);
     dateText.setFillColor(sf::Color::White);
     dateText.setPosition(10, 10);
 
+    // Configure chronometer text
     chronoText.setFont(font);
     chronoText.setCharacterSize(20);
     chronoText.setFillColor(sf::Color::White);
@@ -39,13 +41,12 @@ std::string TextDisplay::getChronoText() const {
     std::stringstream ss;
     ss << "Elapsed time: ";
     
-    // Si tout est à 0, afficher juste 0h
+    // If all values are 0, display just 0h
     if (years == 0 && months == 0 && days == 0 && hours == 0) {
         ss << "0h";
         return ss.str();
     }
 
-    // Toujours remplir avec des zéros et afficher même si égal à 1
     if (hours >= 0) ss << std::setfill('0') << std::setw(2) << hours << "h ";
     if (days >= 0) ss << std::setfill('0') << std::setw(2) << days << "d ";
     if (months >= 0) ss << std::setfill('0') << std::setw(2) << months << "m ";
