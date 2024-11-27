@@ -35,6 +35,9 @@ target_link_libraries(StelarOrbit PRIVATE
 target_compile_features(StelarOrbit PRIVATE cxx_std_17)
 target_include_directories(StelarOrbit PRIVATE include)
 
+# Copier le dossier Ressources
+file(COPY ${CMAKE_SOURCE_DIR}/Ressources DESTINATION ${CMAKE_BINARY_DIR}/bin)
+
 # S'assurer que les DLLs de SFML sont copiées près de l'exécutable
 if (WIN32 AND BUILD_SHARED_LIBS)
     add_custom_command(TARGET StelarOrbit POST_BUILD
