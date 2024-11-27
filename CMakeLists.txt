@@ -21,6 +21,7 @@ add_executable(StelarOrbit src/main.cpp
     src/Planet.cpp
     src/Satellite.cpp
     src/SolarSystem.cpp
+    src/TextDisplay.cpp
 )
 
 # Lier SFML et configurer les include directories
