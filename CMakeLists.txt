@@ -37,14 +37,3 @@ target_include_directories(StelarOrbit PRIVATE include)
 
 # Copy resources folder
 file(COPY ${CMAKE_SOURCE_DIR}/ressources DESTINATION ${CMAKE_BINARY_DIR}/bin)
-
-# Ensure SFML DLLs are copied near executable
-if (WIN32 AND BUILD_SHARED_LIBS)
-    add_custom_command(TARGET StelarOrbit POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:sfml-graphics>
-            $<TARGET_FILE:sfml-window>
-            $<TARGET_FILE:sfml-system>
-            $<TARGET_FILE_DIR:StelarOrbit>
-    )
-endif()
